@@ -1,9 +1,30 @@
+version: '3.8'
+
 services:
-  postgres:
-    image: 'postgres:latest'
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
     environment:
-      - 'POSTGRES_DB=mydatabase'
-      - 'POSTGRES_PASSWORD=secret'
-      - 'POSTGRES_USER=myuser'
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-      - '5432'
+      - "3306:3306"
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+
+  app:
+    build: .
+    container_name: kairos_backend
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/kairos_db
+      SPRING_DATASOURCE_USERNAME: dev
+      SPRING_DATASOURCE_PASSWORD: dev
